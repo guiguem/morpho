@@ -126,6 +126,7 @@ class morpho(object):
                 self.data = pyL.stan_data_files(datafiles)
 
             # STAN run conditions
+            # self.stan_mode = self.read_param(yd, 'stan.run.mode', 'sampling')
             self.algorithm = self.read_param(yd, 'stan.run.algorithm', 'NUTS')
             self.iter = self.read_param(yd, 'stan.run.iter', 2000)
             self.warmup = self.read_param(yd, 'stan.run.warmup', self.iter/2)
@@ -173,7 +174,7 @@ class morpho(object):
         except Exception as err:
             raise err
 
-def stan_cache(model_code, function_files_location, model_name=None, cashe_dir='.',**kwargs):
+def stan_cache(model_code, function_files_location, stan_mode = 'sampling', model_name=None, cashe_dir='.',**kwargs):
     """Use just as you would `stan`"""
 
     theModel = open(model_code,'r+').read()
@@ -229,8 +230,14 @@ def stan_cache(model_code, function_files_location, model_name=None, cashe_dir='
         cache_name_file = open(sa.out_cache_fn,'w+')
         cache_name_file.write(cache_fn)
 
-    logger.info("Starting the sampling")
-    return sm.sampling(**kwargs)
+    print(kwargs)
+
+    if hasattr(sm,stan_mode):
+        logger.info("Starting the {}".format(stan_mode))
+        a = getattr(sm,stan_mode)
+        return a(**kwargs)
+    else:
+        raise
 
 def parse_args():
     '''
@@ -408,7 +415,12 @@ ___  ___                 _            \n\
         if (sa.get_do_Stan()):
             try:
                 logger.info("Doing MC with Stan")
-                result = stan_cache(**(sa.gen_arg_dict()))
+                print(cdata)
+                if 'stan_mode' not in cdata:
+                    result = stan_cache(stan_mode='sampling',**(sa.gen_arg_dict()))
+                else:
+                    result = stan_cache(stan_mode=cdata['stan_mode'],**(sa.gen_arg_dict()))
+
                 stanres = write_result(sa, result)
                 if sa.out_fit != None:
                     save_object(stanres, sa.out_fit)
