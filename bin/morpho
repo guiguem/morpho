@@ -126,7 +126,7 @@ class morpho(object):
                 self.data = pyL.stan_data_files(datafiles)
 
             # STAN run conditions
-            # self.stan_mode = self.read_param(yd, 'stan.run.mode', 'sampling')
+            self.stan_mode = self.read_param(yd, 'stan.run.mode', 'sampling')
             self.algorithm = self.read_param(yd, 'stan.run.algorithm', 'NUTS')
             self.iter = self.read_param(yd, 'stan.run.iter', 2000)
             self.warmup = self.read_param(yd, 'stan.run.warmup', self.iter/2)
@@ -230,21 +230,21 @@ def stan_cache(model_code, function_files_location, stan_mode = 'sampling', mode
         cache_name_file = open(sa.out_cache_fn,'w+')
         cache_name_file.write(cache_fn)
 
-    # print(kwargs)
-    #
-    # if hasattr(sm,stan_mode):
-    #     logger.info("Starting the {}".format(stan_mode))
-    #     a = getattr(sm,stan_mode)
-    #     return a(**kwargs)
-    # else:
-    #     raise
+    if hasattr(sm,stan_mode):
+        logger.info("Starting the {}".format(stan_mode))
+        a = getattr(sm,stan_mode)
+        # print(getargspec(a).args)
+        only_acceptable_kwargs = {k: kwargs[k] for k in getargspec(a).args if k in kwargs}
+        return a(**only_acceptable_kwargs)
+    else:
+        raise
 
-    logger.info("Starting the sampling")
-    text = "Parameters: \n"
-    for key, value in kwargs.iteritems():
-        text = text + "{}\t{}\n".format(key,value)
-    logger.info(text)
-    return sm.sampling(**kwargs)
+    # logger.info("Starting the sampling")
+    # text = "Parameters: \n"
+    # for key, value in kwargs.iteritems():
+    #     text = text + "{}\t{}\n".format(key,value)
+    # logger.info(text)
+    # return sm.sampling(**kwargs)
 
 def parse_args():
     '''
@@ -423,11 +423,12 @@ ___  ___                 _            \n\
         if (sa.get_do_Stan()):
             try:
                 logger.info("Doing MC with Stan")
-                print(cdata)
-                if 'stan_mode' not in cdata:
+
+                if 'stan_mode' not in sa.gen_arg_dict():
+                    logger.debug("Using standard sampling")
                     result = stan_cache(stan_mode='sampling',**(sa.gen_arg_dict()))
                 else:
-                    result = stan_cache(stan_mode=cdata['stan_mode'],**(sa.gen_arg_dict()))
+                    result = stan_cache(**(sa.gen_arg_dict()))
 
                 stanres = write_result(sa, result)
                 if sa.out_fit != None:
