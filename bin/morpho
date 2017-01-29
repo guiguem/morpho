@@ -127,11 +127,11 @@ class morpho(object):
                 self.data = pyL.stan_data_files(datafiles)
 
             # STAN run conditions
-            self.stan_mode = self.read_param(yd, 'stan.run.mode', 'sampling')
-            self.algorithm = self.read_param(yd, 'stan.run.algorithm', 'NUTS')
-            self.iter = self.read_param(yd, 'stan.run.iter', 2000)
-            self.warmup = self.read_param(yd, 'stan.run.warmup', self.iter/2)
-            self.chains = self.read_param(yd, 'stan.run.chain', 4)
+            self.stan_mode = str(self.read_param(yd, 'stan.run.mode', 'sampling')
+            self.algorithm = str(self.read_param(yd, 'stan.run.algorithm', 'NUTS'))
+            self.iter = int(self.read_param(yd, 'stan.run.iter', 2000))
+            self.warmup = int(self.read_param(yd, 'stan.run.warmup', self.iter/2))
+            self.chains = int(self.read_param(yd, 'stan.run.chain', 4))
             self.n_jobs = int(self.read_param(yd, 'stan.run.n_jobs',-1)) # number of jobs to run (-1: all, 1: good for debugging)
             # Adding a seed based on extra arguments, current time
             if isinstance(args.seed,int):
@@ -241,15 +241,16 @@ def stan_cache(model_code, function_files_location, stan_mode = 'sampling', mode
         a = getattr(sm,stan_mode)
         # print(getargspec(a).args)
         only_acceptable_kwargs = {k: kwargs[k] for k in getargspec(a).args if k in kwargs}
+
+        text = "Parameters: \n"
+        for key, value in only_acceptable_kwargs.iteritems():
+            text = text + "{}\t{}\n".format(key,value)
+        logger.info(text)
         return kwargs,a(**only_acceptable_kwargs)
     else:
         raise
 
-    # logger.info("Starting the sampling")
-    # text = "Parameters: \n"
-    # for key, value in kwargs.iteritems():
-    #     text = text + "{}\t{}\n".format(key,value)
-    # logger.info(text)
+
     # return sm.sampling(**kwargs)
 
 def parse_args():
@@ -297,8 +298,10 @@ def update_from_arguments(the_dict,args):
         xpath = result[0].split('.')
         to_update_dict = {xpath[-1]:result[1]}
         for path in reversed(xpath[:-1]):
-            to_update_dict = {path:to_update_dict}
+
+            to_update_dict = { str(path) : to_update_dict }
         new_dict = merge(new_dict,to_update_dict)
+        print(to_update_dict)
     return new_dict
 
 def change_and_format(b):
