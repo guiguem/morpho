@@ -127,7 +127,7 @@ class morpho(object):
                 self.data = pyL.stan_data_files(datafiles)
 
             # STAN run conditions
-            self.stan_mode = str(self.read_param(yd, 'stan.run.mode', 'sampling')
+            self.stan_mode = str(self.read_param(yd, 'stan.run.mode', 'sampling'))
             self.algorithm = str(self.read_param(yd, 'stan.run.algorithm', 'NUTS'))
             self.iter = int(self.read_param(yd, 'stan.run.iter', 2000))
             self.warmup = int(self.read_param(yd, 'stan.run.warmup', self.iter/2))
@@ -239,7 +239,6 @@ def stan_cache(model_code, function_files_location, stan_mode = 'sampling', mode
     if hasattr(sm,stan_mode):
         logger.info("Starting the {}".format(stan_mode))
         a = getattr(sm,stan_mode)
-        # print(getargspec(a).args)
         only_acceptable_kwargs = {k: kwargs[k] for k in getargspec(a).args if k in kwargs}
 
         text = "Parameters: \n"
@@ -301,7 +300,6 @@ def update_from_arguments(the_dict,args):
 
             to_update_dict = { str(path) : to_update_dict }
         new_dict = merge(new_dict,to_update_dict)
-        print(to_update_dict)
     return new_dict
 
 def change_and_format(b):
