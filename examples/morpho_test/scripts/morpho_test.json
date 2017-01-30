@@ -23,8 +23,6 @@
             "chain": 4},
 
 
-        "sample": "./morpho_test/results/morpho_test.out",
-
         "output":
         {
             "name" : "./morpho_test/results/morpho_test",

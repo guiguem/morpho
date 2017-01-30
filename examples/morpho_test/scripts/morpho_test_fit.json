@@ -1,0 +1,71 @@
+{
+   "morpho":
+   {
+     "do_stan": True,
+     "do_postprocessing": False,
+     "do_plots": False
+   },
+    "stan": {
+
+        "name": "morpho_test_fit",
+
+        "model":   {
+            "file": "./morpho_test/models/morpho_test_fit.stan",
+            "function_file": [
+                              ],
+            "cache": "./morpho_test/cache"
+        },
+        "data": {
+          "type": "mc",
+          "files": [
+            {
+              "name" : "./morpho_test/results/morpho_test.root",
+              "format" : "root",
+              "tree" : "morpho_test",
+              "branches" : [
+                {"name" : "theta", "stan_alias" : "y"}
+              ]
+            }],
+              "parameters":[
+                {
+                  "N" : 4000
+                }
+              ]
+            },
+
+        "run": {
+            "mode": "optimizing",
+            "algorithm": "Newton",
+            "iter": 2000,
+            "warmup" : 1000,
+            "chain": 4},
+
+
+
+        "output":
+        {
+            "name" : "./morpho_test/results/morpho_test_fit",
+            "format": "root",
+            "tree" : "morpho_test_fit",
+            "branches": [
+                 {"variable":"mu", "root_alias":"mu"}
+                        ]
+         }
+    },
+
+"postprocessing":
+  {
+    "which_pp":[
+      {
+      }
+   ]
+   },
+
+"plot":
+    {
+      "which_plot":[
+        {
+        }
+        ]
+    }
+}
